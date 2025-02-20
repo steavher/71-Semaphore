@@ -1,0 +1,151 @@
+INSTALL SSHD TO WINDOWS SERVER USING POWERSHELL
+TURN OFF FIREWALLS
+
+sudo pip install pywinrm
+
+@CENTOS
+ssh administrator@0.0.0.0
+
+*********************************************************
+SOLO 
+#nano hosts
+
+[win22]
+0.0.0.0
+
+[win22:vars]
+ansible_user=administrator
+ansible_password=C1sc0123
+ansible_connection=winrm
+ansible_port=5985
+ansible_winrm_transport=ntlm
+ansible_winrm_server_cert_validation=ignore
+
+*********************************************************
+MULTIPLE SERVER
+#nano hosts
+
+[win22]
+server1 ansible_host=192.168.1.101
+server2 ansible_host=192.168.1.102
+server3 ansible_host=192.168.1.103
+# Add more servers as needed
+[win22:vars]
+ansible_user=administrator
+ansible_password=C1sc0123
+ansible_connection=winrm
+ansible_port=5985
+ansible_winrm_transport=ntlm
+ansible_winrm_server_cert_validation=ignore
+
+
+********************************************************
+
+#INSTALL DNS SERVER
+#nano dns.yml
+
+---
+- name: Install DNS Server Role using PowerShell
+  hosts: win22  # Replace with the appropriate host or group
+  gather_facts: yes
+  tasks:
+    - name: Install DNS Server Role with Management Tools
+      win_shell: |
+        Install-WindowsFeature -name DNS -IncludeManagementTools
+      register: dns_install
+
+    - name: Reboot after DNS installation
+      win_reboot:
+        reboot_timeout: 600
+      when: dns_install.changed
+
+********************************************************
+
+#UNINSTALL DNS SERVER
+#nano nodns.yml
+
+---
+- name: Uninstall DNS Server Role using PowerShell
+  hosts: win22  # Replace with the appropriate host or group
+  gather_facts: yes
+  tasks:
+    - name: Uninstall DNS Server Role with Management Tools
+      win_shell: |
+        Uninstall-WindowsFeature -name DNS -IncludeManagementTools
+      register: dns_uninstall
+
+    - name: Reboot after DNS uninstallation
+      win_reboot:
+        reboot_timeout: 600
+      when: dns_uninstall.changed
+
+*************************************************************
+---
+- name: Add DNS Zone and Resource Records
+  hosts: win22  # Replace with the appropriate host or group
+  gather_facts: yes
+  tasks:
+    - name: Add Primary DNS Zone
+      win_shell: |
+        Add-DnsServerPrimaryZone -Name "ngcp12.com" -ZoneFile "ngcp12.com.dns"
+
+    - name: Add NS Record
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -A -Name "ns" -IPv4Address "192.168.108.130"
+
+    - name: Add A Record for Root Domain
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -A -Name "." -IPv4Address "192.168.108.130"
+
+    - name: Add CNAME Record for www
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -Cname -Name "www" -HostNameAlias "ns.ngcp12.com"
+
+    - name: Add CNAME Record for pop
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -Cname -Name "pop" -HostNameAlias "ns.ngcp12.com"
+
+    - name: Add CNAME Record for imap
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -Cname -Name "imap" -HostNameAlias "ns.ngcp12.com"
+
+    - name: Add CNAME Record for smtp
+      win_shell: |
+        Add-DnsServerResourceRecord -ZoneName "ngcp12.com" -Cname -Name "smtp" -HostNameAlias "ns.ngcp12.com"
+
+    - name: Add MX Record
+      win_shell: |
+        Add-DnsServerResourceRecordMX -Preference 10 -Name "." -MailExchange "ns.ngcp12.com" -ZoneName "ngcp12.com"
+
+********************************************************************************************************************
+
+---
+- name: Enable Windows Defender Real-Time Protection, Firewall and Restart
+  hosts: win22  # Replace with the appropriate host or group
+  gather_facts: yes
+  become: yes
+  become_method: runas
+  become_user: Administrator  # Use an admin account
+  tasks:
+
+    - name: Enable Windows Defender Real-Time Protection
+      win_shell: |
+        Set-MpPreference -DisableRealtimeMonitoring $false
+        Start-MpScan -ScanType QuickScan
+      register: defender_enabled
+
+    - name: Enable Windows Firewall
+      win_shell: |
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+      register: firewall_enabled
+
+    - name: Restart Server to Apply Changes
+      win_reboot:
+        reboot_timeout: 600  # 10 minutes timeout for reboot
+        test_command: systeminfo  # Command to check if the system is back online after reboot
+      register: reboot_result
+      until: reboot_result is success
+      retries: 3
+      delay: 60  # Wait for 1 minute before checking again
+
+

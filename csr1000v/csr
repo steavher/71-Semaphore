@@ -1,0 +1,182 @@
+
+nano /etc/ssh/ssh_config
+
+
+Include /etc/ssh/ssh_config.d/*.conf
+HostKeyAlgorithms +ssh-rsa
+PubkeyAcceptedKeyTypes +ssh-rsa
+
+
+**********************************************************************
+
+nano /etc/ssh/sshd_config
+
+Include /etc/ssh/sshd_config.d/*.conf
+HostKeyAlgorithms +ssh-rsa
+PubkeyAcceptedKeyTypes +ssh-rsa
+
+
+*********************************************************************
+
+sudo systemctl restart sshd
+update-crypto-policies --set LEGACY
+
+************************************************************************
+dnf install python3-pip
+pip3 install paramiko
+
+***********************************************************************
+
+nano ansible.cfg
+
+[paramiko_connection]
+look_for_keys = False
+
+***********************************************************************
+
+ansible-config dump --only-changed -t all
+************************************************************************
+#SINGLE DEVICE
+nano hosts
+
+[router]
+192.168.108.133
+
+[router:vars]
+ansible_user=admin
+ansible_password=password
+ansible_connection=network_cli
+ansible_port=22
+ansible_network_os=ios
+ansible_ssh_common_args="-o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa"
+
+
+************************************************************************
+#MULTIPLE
+[router]
+192.168.108.133
+192.168.108.134  ; Add more IPs as needed
+
+[router:vars]
+ansible_user=admin
+ansible_password=password
+ansible_connection=network_cli
+ansible_port=22
+ansible_network_os=ios
+ansible_ssh_common_args="-o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa"
+
+
+***********************************************************************
+ssh -oKexAlgorithms=+diffie-hellman-group14-sha1 admin@192.168.108.135
+
+************************************************************************
+
+#ONE HOST
+---
+- name: LOOPBACK
+  hosts: router1
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create LOOPBACK
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 1.1.1.1 255.255.255.0
+          - no shut
+      vars:
+        ansible_network_os: ios
+
+
+************************************************************************
+#TWO HOST
+---
+- name: LOOPBACK
+  hosts:
+    - router1
+    - router2
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create LOOPBACK
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 1.1.1.1 255.255.255.0
+          - no shut
+      vars:
+        ansible_network_os: ios
+
+
+*********************************************************************
+
+---
+- name: LOOPBACK
+  hosts:
+    - router1
+    - router2
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create LOOPBACK for router1
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 1.1.1.1 255.255.255.0
+          - no shut
+      when: inventory_hostname == 'router1'
+      vars:
+        ansible_network_os: ios
+
+    - name: Create LOOPBACK for router2
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 2.2.2.2 255.255.255.0
+          - no shut
+      when: inventory_hostname == 'router2'
+      vars:
+        ansible_network_os: ios
+
+**********************************************************************
+
+---
+- name: LOOPBACK for router1
+  hosts: router1
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create LOOPBACK
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 1.1.1.1 255.255.255.0
+          - no shut
+      vars:
+        ansible_network_os: ios
+
+- name: LOOPBACK for router2
+  hosts: router2
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create LOOPBACK
+      ios_command:
+        commands:
+          - configure terminal
+          - int lo 1
+          - ip add 2.2.2.2 255.255.255.0
+          - no shut
+      vars:
+        ansible_network_os: ios
+

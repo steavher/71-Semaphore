@@ -1,0 +1,65 @@
+---
+#- name: EDGE ROUTING
+#  hosts: edge # Replace with the appropriate host or group
+#  gather_facts: no  # Disable fact gathering for network devices
+#  become: yes  # Use privilege escalation to execute commands as a privileged user (if needed)
+
+#  tasks:
+
+---
+- name:  OSPF for EDGE
+  hosts: edge
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: OSPF 1 EDGE
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id _0.0.1
+          - network 200.0.0.0 0.0.0.255 area 0
+		  - network 10._._0 0.0.0.255 area 0
+		  - network _.0.0.1 0.0.0.0 area 0
+		  - Interface gi 0/0/0
+		  - ip ospf network point-to-point
+		  - end
+      vars:
+        ansible_network_os: ios
+
+- name:  OSPF for COREBABA
+  hosts: switch
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: OSPF 1 COREBABA
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id 10._._.4
+          - network 10._.0.0 0.0.255.255 area 0
+		  - int gi 0/1
+		  - ip ospf network point-to-point
+		  - end
+      vars:
+        ansible_network_os: ios
+
+- name: OSPF for CUCM
+  hosts: cucm
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: OSPF 1 CUCM
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id 10._.100.8
+          - network 10._.100.0 0.0.0.255 area 0
+		  - end
+      vars:
+        ansible_network_os: ios

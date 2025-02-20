@@ -1,0 +1,137 @@
+# @CENTOS
+
+# Navigate to the Ansible directory
+cd /etc/ansible
+
+# Create a configuration file (optional, can skip if file already exists)
+nano csr1000v_config.txt
+
+# Install Git
+sudo yum install git -y
+
+# Set up Git user information
+git config --global user.name Your Name
+git config --global user.email your_email@example.com
+
+# @GITHUB
+
+# Create a GitHub repository
+# Go to your GitHub account.
+# Click on the "+" icon in the top right and select "New repository."
+# Name your repository (e.g., ansible-backups).
+# Choose whether you want it to be public or private.
+# Click "Create repository."
+
+# @CENTOS
+
+# Initialize Git in the directory
+git init
+
+# Add the remote origin
+git remote add origin git@github.com:username/repository.git
+
+#git remote add origin git@github.com:rivan16/ansible-backups.git
+
+# Generate SSH key (if you haven't already)
+ssh-keygen -t rsa -b 4096 -C your_email@example.com
+
+# Start the SSH agent
+eval "$(ssh-agent -s)"
+
+# Add your SSH key to the SSH agent
+ssh-add ~/.ssh/id_rsa
+
+# Copy your SSH key to the clipboard
+cat ~/.ssh/id_rsa.pub
+# Go to your GitHub account, navigate to Settings > SSH and GPG keys > New SSH key.
+# Paste your SSH key and give it a title, then click Add SSH key.
+
+# Verify your SSH connection
+ssh -T git@github.com
+
+# You should see:
+# Hi yourusername! You've successfully authenticated, but GitHub does not provide shell access.
+
+# Create your Ansible playbook (save this as /etc/ansible/router.yml)
+/etc/ansible/router.yml
+nano router.yml
+
+git branch
+git push origin main
+git branch -r
+
+
+---
+- name: Backup Cisco Configuration to GitHub
+  hosts: router1
+  gather_facts: no
+  tasks:
+    - name: Get running config
+      ios_command:
+        commands:
+          - show running-config
+      register: config_output
+
+    - name: Check if previous config file exists
+      stat:
+        path: "/etc/ansible/csr1000v_config.txt"
+      register: config_file
+
+    - name: Read previous configuration
+      slurp:
+        src: "/etc/ansible/csr1000v_config.txt"
+      register: previous_config
+      when: config_file.stat.exists
+
+    - name: Compare configurations
+      set_fact:
+        config_changed: "{{ config_output.stdout[0] != (previous_config.content | b64decode) }}"
+
+    - name: Save current configuration to file
+      copy:
+        content: "{{ config_output.stdout[0] }}"
+        dest: "/etc/ansible/csr1000v_config.txt"
+      when: config_changed
+
+    - name: Push backup to GitHub
+      shell: |
+        cd /etc/ansible/
+        git add csr1000v_config.txt
+        git commit -m "Backup configuration on {{ '%Y-%m-%d %H:%M:%S' | strftime }}"
+        git push origin main
+      args:
+        chdir: /etc/ansible/
+      when: config_changed
+
+
+# Run your Ansible playbook (ensure your inventory is set up)
+ansible-playbook router.yml
+
+
+
+**************************************************************************
+git branch
+git push origin master
+git checkout -b main
+git push origin main
+git push --set-upstream origin master
+git branch -r
+
+git config --global --unset user.name
+git config --global --unset user.email
+git remote remove origin
+git remote -v
+rm ~/.ssh/id_rsa.pub
+
+
+
+git config --global user.name rivan16
+git config --global user.email vonherbertfaborada@gmail.com
+git init
+git remote add origin git@github.com:USERNAMENIYO/ansible-backups.git
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub
+
+ssh -T git@github.com

@@ -1,0 +1,16 @@
+---
+- name: Show IP Interface Brief
+  hosts: switch  # Replace with the appropriate host or group
+  gather_facts: no  # Disable fact gathering for network devices
+  become: yes  # Use privilege escalation if needed
+
+  tasks:
+    - name: Show IP Interface Brief
+      ios_command:
+        commands:
+          - show ip interface brief
+      register: interface_brief_output
+
+    - name: Display Interface Brief Output
+      debug:
+        var: interface_brief_output.stdout_lines
