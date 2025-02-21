@@ -19,7 +19,7 @@
 
   tasks:
     - name: Include tasks for OSPF routing configuration
-      include_tasks: ospf.yml
+      include_tasks: ospfedge.yml
 
 
 # ACCESS POINT
