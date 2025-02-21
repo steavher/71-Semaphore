@@ -1,10 +1,10 @@
----
-- name:  OSPF for EDGE
-  hosts: edge
-  gather_facts: no
-  become: yes
+#---
+#- name:  OSPF for EDGE
+#  hosts: edge
+#  gather_facts: no
+#  become: yes
 
-  tasks:
+#  tasks:
     - name: OSPF 1 EDGE
       ios_command:
         commands:
