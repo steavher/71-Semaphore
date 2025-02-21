@@ -94,3 +94,18 @@
       vars:
         ansible_network_os: ios
       register: result_configure_ports
+
+#  OSPF ROUTING
+
+    - name: OSPF 1 COREBABA
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id 10.61.61.4
+          - network 10.61.0.0 0.0.255.255 area 0
+          - int gi 0/1
+          - ip ospf network point-to-point
+          - end
+      vars:
+        ansible_network_os: ios
