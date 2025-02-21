@@ -85,3 +85,16 @@
           - end
       vars:
         ansible_network_os: ios
+
+
+# OSPF ROUTING FOR CUCM
+    - name: OSPF 1 CUCM
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id 10._.100.8
+          - network 10._.100.0 0.0.0.255 area 0
+          - end
+      vars:
+        ansible_network_os: ios
