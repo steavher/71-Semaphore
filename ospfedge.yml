@@ -1,0 +1,22 @@
+---
+- name:  OSPF for EDGE
+  hosts: edge
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: OSPF 1 EDGE
+      ios_command:
+        commands:
+          - configure terminal
+          - router ospf 1
+          - router-id _0.0.1
+          - network 200.0.0.0 0.0.0.255 area 0
+          - network 10._._0 0.0.0.255 area 0
+          - network _.0.0.1 0.0.0.0 area 0
+          - Interface gi 0/0/0
+          - ip ospf network point-to-point
+          - end
+      vars:
+        ansible_network_os: ios
+
