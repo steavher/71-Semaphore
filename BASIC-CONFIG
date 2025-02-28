@@ -2,7 +2,9 @@ dnf update -y
 
 dnf install epel-release -y
 
-dnf install python
+dnf install python -y
+
+dnf install pip -y
 
 dnf install ansible -y
 
