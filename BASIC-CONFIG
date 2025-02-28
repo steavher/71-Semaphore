@@ -2,6 +2,8 @@ dnf update -y
 
 dnf install epel-release -y
 
+dnf install git -y
+
 dnf install python -y
 
 dnf install pip -y
