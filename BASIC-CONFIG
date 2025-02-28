@@ -4,6 +4,8 @@ dnf install epel-release -y
 
 dnf install git -y
 
+dnf install wget -y
+
 dnf install python -y
 
 dnf install pip -y
