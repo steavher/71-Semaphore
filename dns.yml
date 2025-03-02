@@ -1,10 +1,9 @@
 ---
-- name: Run PowerShell script on Windows
-  hosts: win22  # Your target host
+- name: CUCM
+  hosts: win22
   gather_facts: false
-  connection: winrm  # Or ssh if configured
+  connection: local
 
   tasks:
-    - name: Run dns.ps1 PowerShell script
-      win_shell: |
-        dns.ps1  # Just run the script, assuming it's available on the target machine
+    - name: Include tasks for iPhone configuration
+      include_tasks: dns.ps1
