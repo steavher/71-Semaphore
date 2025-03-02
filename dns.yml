@@ -1,0 +1,3 @@
+    - name: Run DNS PowerShell script on Linux
+      run: |
+        pwsh ./dns.ps1
