@@ -221,7 +221,7 @@ crypto key generate rsa general-keys modulus 2048
 @@EDGE
 
 config t
-hostname EDGE_
+hostname EDGE_71
 enable secret pass
 service password-encryption
 no logging console
