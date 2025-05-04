@@ -37,9 +37,9 @@ PubkeyAcceptedKeyTypes +ssh-rsa
 
 **********************************************************************
 
-nano /etc/ssh/sshd_config
+nano /etc/ssh/sshd71config
 
-Include /etc/ssh/sshd_config.d/*.conf
+Include /etc/ssh/sshd71config.d/*.conf
 HostKeyAlgorithms +ssh-rsa
 PubkeyAcceptedKeyTypes +ssh-rsa
 
@@ -51,7 +51,7 @@ pip3 install paramiko
 cd /etc/ansible
 nano ansible.cfg
 
-[paramiko_connection]
+[paramiko71connection]
 look_for_keys = False
 
 ***********************************************************************
@@ -286,7 +286,7 @@ TRY THE SSH CONNECTION
 
 CORE BABA 
 
-ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 -c aes256-cbc admin@10._.1.4
+ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 -c aes256-cbc admin@10.71.1.4
 
 ************************************************************************
 Create Alias on Linux - FOR COREBABA
@@ -299,22 +299,22 @@ ssh_short admin@10.12.1.4
 
 **************************************************************************
 
-ssh admin@10._.12.100.8
-ssh admin@10._._.1
+ssh admin@10.71.12.100.8
+ssh admin@10.71.71.1
 
 ************************************************************************
 OPEN CMD ON WINDOWS SEVER
 
-route add 10.0.0.0 mask 255.0.0.0 10._.1.4
-route add 200.0.0.0 mask 255.255.255.0 10._.1.4
+route add 10.0.0.0 mask 255.0.0.0 10.71.1.4
+route add 200.0.0.0 mask 255.255.255.0 10.71.1.4
 ************************************************************************
 
 
 REMOVE SSH 
 
-ssh-keygen -f "/root/.ssh/known_hosts" -R "10._.1.4"
-ssh-keygen -f "/root/.ssh/known_hosts" -R "10._.100.8"
-ssh-keygen -f "/root/.ssh/known_hosts" -R "10._._.1"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "10.71.1.4"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "10.71.100.8"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "10.71.71.1"
 
 
 
