@@ -37,7 +37,7 @@ PubkeyAcceptedKeyTypes +ssh-rsa
 
 **********************************************************************
 
-nano /etc/ssh/sshd71config
+nano /etc/ssh/sshd_config
 
 Include /etc/ssh/sshd71config.d/*.conf
 HostKeyAlgorithms +ssh-rsa
